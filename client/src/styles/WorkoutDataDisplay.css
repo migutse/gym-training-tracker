@@ -172,15 +172,32 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem;
+  background: rgba(100, 108, 255, 0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
   margin-bottom: 1rem;
+}
+
+.exercise-header:hover {
+  background: rgba(100, 108, 255, 0.15);
+}
+
+.exercise-toggle {
+  color: #646cff;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
 }
 
 .exercise-header h4 {
   margin: 0;
   font-size: 1.1rem;
   color: #fff;
+  flex-grow: 1;
 }
-
 .sets-count {
   background-color: rgba(100, 108, 255, 0.2);
   color: #a8b0ff;

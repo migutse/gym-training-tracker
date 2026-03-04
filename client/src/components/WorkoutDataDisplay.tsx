@@ -11,6 +11,7 @@ interface WorkoutDataDisplayProps {
 
 export function WorkoutDataDisplay({ data }: WorkoutDataDisplayProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [expandedExercises, setExpandedExercises] = useState<Set<string>>(new Set())
 
   if (data.length === 0) return null
 
@@ -81,6 +82,19 @@ export function WorkoutDataDisplay({ data }: WorkoutDataDisplayProps) {
     }
   }
 
+  // Toggle exercise expansion
+  const toggleExercise = (exerciseKey: string) => {
+    setExpandedExercises(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(exerciseKey)) {
+        newSet.delete(exerciseKey)
+      } else {
+        newSet.add(exerciseKey)
+      }
+      return newSet
+    })
+  }
+
   return (
     <div className="workout-data-display">
       <div className="data-summary">
@@ -132,42 +146,56 @@ export function WorkoutDataDisplay({ data }: WorkoutDataDisplayProps) {
                     acc[exerciseKey].push(record)
                     return acc
                   }, {} as Record<string, WorkoutRecord[]>)
-                ).map(([exerciseName, sets]) => (
-                  <div key={exerciseName} className="exercise-item">
-                    <div className="exercise-header">
-                      <h4>{exerciseName}</h4>
-                      <span className="sets-count">{sets.length} set{sets.length !== 1 ? 's' : ''}</span>
-                    </div>
+                ).map(([exerciseName, sets]) => {
+                  const exerciseId = `${session.key}-${exerciseName}`
+                  const isExpanded = expandedExercises.has(exerciseId)
 
-                    <div className="sets-list">
-                      {sets.map((set, setIndex) => (
-                        <div key={setIndex} className="set-item">
-                          <span className="set-number">Set {parseInt(set.set_index) + 1}:</span>
-                          {set.weight_kg && set.reps ? (
-                            <span className="set-details">
-                              {set.weight_kg} kg × {set.reps} reps
-                            </span>
-                          ) : set.distance_km && set.duration_seconds ? (
-                            <span className="set-details">
-                              {set.distance_km} km in {Math.round(parseInt(set.duration_seconds) / 60)} min
-                            </span>
-                          ) : set.duration_seconds ? (
-                            <span className="set-details">
-                              {Math.round(parseInt(set.duration_seconds) / 60)} min
-                            </span>
-                          ) : (
-                            <span className="set-details">Completed</span>
+                  return (
+                    <div key={exerciseName} className="exercise-item">
+                      <div 
+                        className="exercise-header"
+                        onClick={() => toggleExercise(exerciseId)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <span className="exercise-toggle">{isExpanded ? '▼' : '▶'}</span>
+                        <h4>{exerciseName}</h4>
+                        <span className="sets-count">{sets.length} set{sets.length !== 1 ? 's' : ''}</span>
+                      </div>
+
+                      {isExpanded && (
+                        <>
+                          <div className="sets-list">
+                            {sets.map((set, setIndex) => (
+                              <div key={setIndex} className="set-item">
+                                <span className="set-number">Set {parseInt(set.set_index) + 1}:</span>
+                                {set.weight_kg && set.reps ? (
+                                  <span className="set-details">
+                                    {set.weight_kg} kg × {set.reps} reps
+                                  </span>
+                                ) : set.distance_km && set.duration_seconds ? (
+                                  <span className="set-details">
+                                    {set.distance_km} km in {Math.round(parseInt(set.duration_seconds) / 60)} min
+                                  </span>
+                                ) : set.duration_seconds ? (
+                                  <span className="set-details">
+                                    {Math.round(parseInt(set.duration_seconds) / 60)} min
+                                  </span>
+                                ) : (
+                                  <span className="set-details">Completed</span>
+                                )}
+                                {set.rpe && <span className="rpe">RPE: {set.rpe}</span>}
+                              </div>
+                            ))}
+                          </div>
+
+                          {sets[0].exercise_notes && (
+                            <div className="exercise-notes">{sets[0].exercise_notes}</div>
                           )}
-                          {set.rpe && <span className="rpe">RPE: {set.rpe}</span>}
-                        </div>
-                      ))}
+                        </>
+                      )}
                     </div>
-
-                    {sets[0].exercise_notes && (
-                      <div className="exercise-notes">{sets[0].exercise_notes}</div>
-                    )}
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           ))}
