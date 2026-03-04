@@ -12,12 +12,11 @@ app.use(cors())
 app.use(express.json())
 
 // In production we'll serve the React front-end from the client/dist folder.
-// The build step (npm run build at the workspace root) already builds the
-// client into that directory. When the server is started from the root
-// workspace (`npm start`), __dirname will point to server/dist, so we go up
-// two directories to reach the project root.
 if (process.env.NODE_ENV === 'production') {
-  const clientDistPath = path.resolve(__dirname, '../../client/dist')
+  // In production, __dirname resolves to /app/server/dist (or similar)
+  // We need to go up 2 directories: /app/server/dist -> /app/server -> /app
+  // Then into client/dist
+  const clientDistPath = path.join(process.cwd(), '..', 'client', 'dist')
   app.use(express.static(clientDistPath))
 
   // Send index.html for any unknown route so React Router (if used) can handle it
